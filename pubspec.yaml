@@ -1,5 +1,5 @@
 name: ec_adapter
-description: A new Flutter package project.
+description: Adaptation of ListView based on mvvm architecture.
 version: 1.0.0
 homepage: https://github.com/JPIOS/ec_adapter.git
 
