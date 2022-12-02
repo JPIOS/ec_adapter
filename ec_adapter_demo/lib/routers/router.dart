@@ -1,14 +1,14 @@
-import 'package:ec_adapter_demo/scr/exmples/has_section/has_section_page_vm.dart';
-import 'package:ec_adapter_demo/scr/exmples/has_section_separated/has_section_separated_page_vm.dart';
 import 'package:ec_adapter_demo/scr/home/home_page.dart';
-import '../scr/exmples/cell_separated/cell_separated_page.dart';
-import '../scr/exmples/has_section/has_section_page.dart';
-import '../scr/exmples/has_section_rand/has_section_rand_page.dart';
-import '../scr/exmples/has_section_separated/has_section_separated_page.dart';
-import '../scr/exmples/only_cell/only_cell_page.dart';
-
 import '../scr/home/home_page_vm.dart';
 import 'package:get/get.dart';
+import '../scr/pages/cell_separated/cell_separated_page.dart';
+import '../scr/pages/has_section/has_section_page.dart';
+import '../scr/pages/has_section/has_section_page_vm.dart';
+import '../scr/pages/has_section_rand/has_section_rand_page.dart';
+import '../scr/pages/has_section_separated/has_section_separated_page.dart';
+import '../scr/pages/has_section_separated/has_section_separated_page_vm.dart';
+import '../scr/pages/only_cell/only_cell_page.dart';
+import '../scr/pages/page_view/ec_page_view_demo.dart';
 
 class ECRouter {
   static String home = '/';
@@ -17,6 +17,7 @@ class ECRouter {
   static String hasSection = '/ECHasSectionPage';
   static String hasSectionSeparated = '/ECHasSectionSeparatedPage';
   static String hasSectionRand = '/ECHasSectionRandPage';
+  static String pageView = '/pageView';
 
   static List<GetPage> getPages() {
     return [
@@ -53,6 +54,11 @@ class ECRouter {
         name: hasSectionRand,
         page: () => ECHasSectionRandPage(),
         binding: BindingsBuilder.put(() => ECHasSectionRandPageVM()),
+      ),
+
+      GetPage(
+        name: pageView,
+        page: () => ECPageViewDemoPage(),
       ),
     ];
   }

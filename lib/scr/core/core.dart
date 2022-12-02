@@ -2,10 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import '../list_view/list_view_adapter.dart';
 
-
 class AdapterListViewBuilder {
-
-
   /// 通用ListView
   /// 通过 adpater的_sectionItems来控制ListView
   static ListView builder(
@@ -65,6 +62,50 @@ class AdapterListViewBuilder {
     );
   }
 
+  /// 通用 PageView
+  /// 通过 adpater的_sectionItems来控制ListView
+  static PageView pageBuilder(
+    ListViewAdapter adpater, {
+    required Function() reloadCall,
+    Key? key,
+    Axis scrollDirection = Axis.horizontal,
+    bool reverse = false,
+    PageController? controller,
+    ScrollPhysics? physics,
+    bool pageSnapping = true,
+    void Function(int)? onPageChanged,
+    int? Function(Key)? findChildIndexCallback,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
+    bool allowImplicitScrolling = false,
+    String? restorationId,
+    Clip clipBehavior = Clip.hardEdge,
+    ScrollBehavior? scrollBehavior,
+    bool padEnds = true,
+  }) {
+    /// 让adpater持有reloadCall
+    adpater.reloadCall ??= reloadCall;
+
+    return PageView.builder(
+      key: key,
+      scrollDirection: scrollDirection,
+      reverse: reverse,
+      controller: controller,
+      physics: physics,
+      pageSnapping: pageSnapping,
+      onPageChanged: onPageChanged,
+      findChildIndexCallback: findChildIndexCallback,
+      dragStartBehavior: dragStartBehavior,
+      allowImplicitScrolling: allowImplicitScrolling,
+      restorationId: restorationId,
+      clipBehavior: clipBehavior,
+      scrollBehavior: scrollBehavior,
+      itemBuilder: (context, index) {
+        return adpater.buildListCell(context, index);
+      },
+      itemCount: adpater.itemCount,
+    );
+  }
+
   /// 创建section具备圆角的功能，section可以包含header和footer
   /// ListViewAdapter初始化的时候需要配置sectionSeparated属性,并大于0
   /// padding默认两边边距是16
@@ -80,6 +121,7 @@ class AdapterListViewBuilder {
   //   adpater.setRand(radiu);
   //   return adapterBuilder(adpater, reloadCall: reloadCall, padding: padding);
   // }
+
 }
 
 extension WrapGestureExtention on Widget {

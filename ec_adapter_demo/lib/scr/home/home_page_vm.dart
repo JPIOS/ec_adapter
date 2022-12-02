@@ -15,6 +15,7 @@ class HomePageVM extends GetxController {
       HomeCellVM("有section", ECRouter.hasSection),
       HomeCellVM(
           "有section和section的sectionSeparated", ECRouter.hasSectionSeparated),
+      HomeCellVM("PageView", ECRouter.pageView),
     ];
 
     ListViewBaseSectionItem sectionVM = ListViewBaseSectionItem();
