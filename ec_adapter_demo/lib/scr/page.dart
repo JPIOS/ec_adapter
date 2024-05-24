@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('SingleCellDemo'),
+          title: const Text('Single Or Section Demo'),
         ),
         body: AdapterListViewBuilder.builder(vm.adpater, reloadCall: () {
           if (mounted) setState(() {});

@@ -30,9 +30,13 @@ class AdapterListViewBuilder {
         ScrollViewKeyboardDismissBehavior.manual,
     String? restorationId,
     Clip clipBehavior = Clip.hardEdge,
+    Widget? listFooter,
+    Widget? listHeader,
   }) {
     /// 让adpater持有reloadCall
     adpater.reloadCall ??= reloadCall;
+    adpater.listFooter = listFooter;
+    adpater.listHeader = listHeader;
 
     return ListView.builder(
       key: key,
@@ -121,7 +125,6 @@ class AdapterListViewBuilder {
   //   adpater.setRand(radiu);
   //   return adapterBuilder(adpater, reloadCall: reloadCall, padding: padding);
   // }
-
 }
 
 extension WrapGestureExtention on Widget {

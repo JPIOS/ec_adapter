@@ -8,4 +8,8 @@
 
 ## [1.1.1] 
 
-- 添加添加section圆角的功能
+- 添加section圆角的功能
+
+## [1.1.2] 
+
+- 添加list的header与footer

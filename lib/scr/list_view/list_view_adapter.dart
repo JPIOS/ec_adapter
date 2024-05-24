@@ -5,9 +5,9 @@ import 'list_view_header_footer_type.dart';
 import 'list_view_item_type.dart';
 import 'list_view_section_type.dart';
 
-class ListViewAdapter {
-  /// 页面的控制器
-  WeakReference? weakPageController;
+class ListViewAdapter<PVM extends Object> {
+  /// 页面的控制器VM
+  WeakReference<PVM>? weakPageViewModel;
 
   /// 用于页面刷新
   /// 当数据_sectionItems发生改变的时候则会执行该函数
@@ -27,19 +27,19 @@ class ListViewAdapter {
   /// 保存section数据
   final List<ListViewSectionItemType> _sectionItems = [];
 
-  /// section设置圆角
-  bool? _isSectionRand;
+  /// 列表头部 最多一个 listFooter
+  Widget? listHeader;
 
-  /// section的圆角
-  double? _sectionRadiu;
+  /// 列表底部，最多一个 listFooter
+  Widget? listFooter;
 
   ListViewAdapter(
       {Key? key,
-      Object? pageController,
+      PVM? pageVM,
       this.sectionSeparated = 0.0,
       this.sectionSeparatedBuilder}) {
-    if (pageController != null) {
-      weakPageController = WeakReference(pageController);
+    if (pageVM != null) {
+      weakPageViewModel = WeakReference(pageVM);
     }
   }
 
@@ -65,33 +65,37 @@ class ListViewAdapter {
     reload(sections: [section]);
   }
 
-  setRand(double radiu) {
-    _isSectionRand = true;
-    _sectionRadiu = radiu;
-  }
-
   /// 将section转化成row
   _doWithSectionToRow() {
     _dataSource.clear();
 
     for (int i = 0; i < _sectionItems.length; i++) {
-      ListViewSectionItemType sectionIten = _sectionItems[i];
-      sectionIten.reloadList ??= () {
+      ListViewSectionItemType sectionItem = _sectionItems[i];
+
+      sectionItem.reloadList ??= () {
         reload();
       };
 
+      if (weakPageViewModel?.target != null) {
+        sectionItem.weakPageViewModel =
+            WeakReference(weakPageViewModel!.target!);
+      }
+
       // header
-      if (sectionIten.headerBuilder != null) {
-        _dataSource.add(_headerFooterItem(sectionIten));
+      if (sectionItem.headerBuilder != null) {
+        _dataSource.add(_headerFooterItem(sectionItem));
       }
 
       // item
-      for (int i = 0; i < sectionIten.items.length; i++) {
-        ListViewItemType rowItem = sectionIten.items[i];
+      for (int i = 0; i < sectionItem.items.length; i++) {
+        ListViewItemType rowItem = sectionItem.items[i];
+
+        // 如果不展示则不添加在数据源中
+        if (!rowItem.showItem) continue;
         _dataSource.add(rowItem);
 
         // item seprate
-        if (rowItem.hasSeparated && i != (sectionIten.items.length - 1)) {
+        if (rowItem.hasSeparated && i != (sectionItem.items.length - 1)) {
           if (rowItem.separatedBuilder != null) {
             _dataSource.add(
                 _separatedItem(separatedBuilder: rowItem.separatedBuilder!));
@@ -101,15 +105,45 @@ class ListViewAdapter {
         }
       }
 
+      // 圆角处理
+      if (sectionItem.hasRadiu) {
+        sectionItem.items
+            .where((element) => element.showItem)
+            .firstOrNull
+            ?.topRadiu = sectionItem.sectionRadiu;
+
+        sectionItem.items.reversed
+            .where((element) => element.showItem)
+            .firstOrNull
+            ?.bottomRadiu = sectionItem.sectionRadiu;
+      }
+
       // footer
-      if (sectionIten.footerBuilder != null) {
-        _dataSource.add(_headerFooterItem(sectionIten, isHeader: false));
+      if (sectionItem.footerBuilder != null) {
+        _dataSource.add(_headerFooterItem(sectionItem, isHeader: false));
       }
 
       // for section separated： 作为拓展还是加上
-      if (sectionSeparated > 0 && i != _sectionItems.length - 1) {
+      if (sectionSeparated > 0 &&
+          i != _sectionItems.length - 1 &&
+          sectionSeparatedBuilder != null) {
         _dataSource.add(_separatedItem(separated: sectionSeparated));
       }
+
+      if (sectionSeparatedBuilder != null && i != _sectionItems.length - 1) {
+        _dataSource.add(_separatedItem(separatedBuilder: () {
+          return sectionSeparatedBuilder!.call(i);
+        }));
+      }
+    }
+
+    // list footer
+    if (listHeader != null) {
+      _dataSource.add(_listHeaderFooterItem(header: listHeader));
+    }
+    // list footer
+    if (listFooter != null) {
+      _dataSource.add(_listHeaderFooterItem(footer: listFooter));
     }
   }
 
@@ -135,7 +169,7 @@ class ListViewAdapter {
         return headerFooter.wrapGesture(() {
           headerFooter.didSelect(sectionItem);
           headerFooter.didSelectMoreItem(
-              sectionItem, weakPageController?.target);
+              sectionItem, weakPageViewModel?.target);
         });
       }
 
@@ -144,17 +178,55 @@ class ListViewAdapter {
 
     if (item is ListViewItemType) {
       ListViewCellType cell = item.cellBuilder();
+      Widget widgetCell = cell;
+
       cell.item = item;
+
+      if (weakPageViewModel?.target != null) {
+        item.weakPageViewModel = WeakReference(weakPageViewModel!.target!);
+      }
+
       if (item.isTapEnable) {
-        return cell.wrapGesture(() {
+        widgetCell = cell.wrapGesture(() {
           cell.didSelect(item);
-          if (item.sectionItem.target != null) {
+          if (item.sectionItem?.target != null) {
+            cell.didSelectSection(item, item.sectionItem!.target!);
+          }
+
+          if (weakPageViewModel?.target != null) {
+            cell.didSelectPageVM(item, weakPageViewModel!.target!);
+          }
+
+          if (item.sectionItem?.target != null &&
+              weakPageViewModel?.target != null) {
             cell.didSelectMoreItem(
-                item, item.sectionItem.target!, weakPageController?.target);
+                item, item.sectionItem!.target!, weakPageViewModel?.target);
           }
         });
       }
-      return cell;
+
+      // 头部圆角
+      if (item.topRadiu != null && item.topRadiu! > 0) {
+        widgetCell = ClipRRect(
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(item.topRadiu!)),
+            child: widgetCell);
+      }
+
+      /// 底部圆角
+      if (item.bottomRadiu != null && item.bottomRadiu! > 0) {
+        widgetCell = ClipRRect(
+          borderRadius:
+              BorderRadius.vertical(bottom: Radius.circular(item.bottomRadiu!)),
+          child: widgetCell,
+        );
+      }
+      return widgetCell;
+    }
+
+    if (item is _listHeaderFooterItem) {
+      if (item.footer != null) return item.footer!;
+      if (item.header != null) return item.header!;
     }
     assert(true, "section row计算出问题");
     return Container();
@@ -202,6 +274,14 @@ class _headerFooterItem {
     headerFooter.sectionItem = sectionItem;
     return headerFooter;
   }
+}
+
+// ignore: camel_case_types
+class _listHeaderFooterItem {
+  final Widget? footer;
+  final Widget? header;
+
+  _listHeaderFooterItem({this.header, this.footer});
 }
 
 /// separated的数据模型

@@ -3,9 +3,12 @@ import 'package:flutter/widgets.dart';
 import 'list_view_item_type.dart';
 
 /// section Type
-mixin ListViewSectionItemType on Object {
+mixin ListViewSectionItemType<T extends ListViewItemType> on Object {
   /// 直接设置separated高度，内部采用SizeBox实现
   double? separated;
+
+  /// item会对页面的控制器进行弱引用(如果有传则会)
+  WeakReference? weakPageViewModel;
 
   /// 如果这个方法不为null，则优先使用separatedBuilder，而废弃separated属性
   /// 不建议使用该方法
@@ -24,25 +27,29 @@ mixin ListViewSectionItemType on Object {
   // int _allLength = 0;
 
   /// ListViewItemType配置列表
-  final List<ListViewItemType> _items = [];
+  final List<T> _items = [];
 
-  List<ListViewItemType> get items => _items;
+  List<T> get items => _items;
 
   /// 添加cellVM数组
-  addItems(List<ListViewItemType> vms) {
+  addItems(Iterable<T> vms) {
     vms.forEach(_setupItem);
     _items.addAll(vms);
   }
 
   /// 删除某一个cellVM
-  remove(ListViewItemType vm) {
+  remove(T vm) {
     _items.remove(vm);
   }
 
   /// 添加一个cellVM
-  add(ListViewItemType vm) {
+  add(T vm) {
     _setupItem(vm);
     _items.add(vm);
+  }
+
+  clear() {
+    _items.clear();
   }
 
   /// 让section可以更新整个的list
@@ -51,7 +58,7 @@ mixin ListViewSectionItemType on Object {
 
   /// 没有item没有设置自己的 separatedBuilder、separated
   /// 而且section有设置，则会用section的给item设置
-  _setupItem(ListViewItemType item) {
+  _setupItem(T item) {
     item.sectionItem = WeakReference(this);
 
     if (!item.hasSeparated && _hasSeparated) {
@@ -59,4 +66,12 @@ mixin ListViewSectionItemType on Object {
       item.separatedBuilder = separatedBuilder;
     }
   }
+
+  /// 设置section的圆角
+  /// 一旦设置，则会对items构建的cell做圆角处理
+  /// 背景会设置成白色
+  /// 一旦设置了圆角，切不要设置
+  /// separatedBuilder或者 separated
+  double? sectionRadiu;
+  bool get hasRadiu => sectionRadiu != null && sectionRadiu! > 0;
 }
