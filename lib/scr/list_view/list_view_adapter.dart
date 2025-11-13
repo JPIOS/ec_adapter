@@ -106,16 +106,16 @@ class ListViewAdapter<PVM extends Object> {
       }
 
       // 圆角处理
-      if (sectionItem.hasRadiu) {
+      if (sectionItem.hasRadius) {
         sectionItem.items
             .where((element) => element.showItem)
             .firstOrNull
-            ?.topRadiu = sectionItem.sectionRadiu;
+            ?.topRadiu = sectionItem.sectionRadius;
 
         sectionItem.items.reversed
             .where((element) => element.showItem)
             .firstOrNull
-            ?.bottomRadiu = sectionItem.sectionRadiu;
+            ?.bottomRadiu = sectionItem.sectionRadius;
       }
 
       // footer
@@ -237,21 +237,6 @@ class ListViewAdapter<PVM extends Object> {
     return _dataSource.length;
   }
 }
-
-// /// 双向链表的数据数据节点
-// class _ECAdapterNode {
-//   /// 上一个节点
-//   _ECAdapterNode? preNode;
-
-//   /// 下一个节点
-//   _ECAdapterNode? nextNode;
-
-//   /// 当前的数据
-//   /// 类型：ListViewItemType _headerFooterItem _separatedItem
-//   final dynamic data;
-
-//   _ECAdapterNode(this.data, {this.preNode, this.nextNode});
-// }
 
 /// section中头部/尾部的数据模型
 // ignore: camel_case_types

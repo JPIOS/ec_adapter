@@ -72,6 +72,6 @@ mixin ListViewSectionItemType<T extends ListViewItemType> on Object {
   /// 背景会设置成白色
   /// 一旦设置了圆角，切不要设置
   /// separatedBuilder或者 separated
-  double? sectionRadiu;
-  bool get hasRadiu => sectionRadiu != null && sectionRadiu! > 0;
+  double? sectionRadius;
+  bool get hasRadius => sectionRadius != null && sectionRadius! > 0;
 }
